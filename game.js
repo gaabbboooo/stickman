@@ -4,17 +4,14 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener("resize", resize);
-resize();
-
 // =======================
-// TIEMPO
+// ESTADO GLOBAL
 // =======================
 let isNight = false;
+let pits = [];
+let enemies = [];
+let goal = {};
+let stage = 1;
 
 // =======================
 // JUGADOR
@@ -38,7 +35,6 @@ const gravity = 0.6;
 // =======================
 const keys = { left: false, right: false, up: false };
 
-// Teclado
 window.addEventListener("keydown", e => {
   if (e.key === "ArrowLeft") keys.left = true;
   if (e.key === "ArrowRight") keys.right = true;
@@ -59,63 +55,44 @@ const buttons = {
   up: { x: 0, y: 0, w: 80, h: 80 }
 };
 
-function positionButtons() {
-  const margin = 20;
-  const bottom = canvas.height - 100;
-
-  // izquierda inferior
-  buttons.left.x = margin;
-  buttons.left.y = bottom;
-
-  buttons.right.x = margin + 100;
-  buttons.right.y = bottom;
-
-  // derecha inferior (saltar)
-  buttons.up.x = canvas.width - 100;
-  buttons.up.y = bottom;
-}
-positionButtons();
-window.addEventListener("resize", positionButtons);
-
 canvas.addEventListener("touchstart", e => {
   e.preventDefault();
-  for (let t of e.touches) {
-    handleTouch(t.clientX, t.clientY, true);
-  }
+  for (let t of e.touches) handleTouch(t.clientX, t.clientY, true);
 });
-
 canvas.addEventListener("touchend", () => {
-  keys.left = false;
-  keys.right = false;
-  keys.up = false;
+  keys.left = keys.right = keys.up = false;
 });
 
 function handleTouch(x, y, down) {
   for (let k in buttons) {
     const b = buttons[k];
-    if (
-      x > b.x &&
-      x < b.x + b.w &&
-      y > b.y &&
-      y < b.y + b.h
-    ) {
+    if (x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h) {
       keys[k] = down;
     }
   }
 }
 
 // =======================
+// RESIZE + INIT
+// =======================
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  positionButtons();
+  initWorld();
+}
+window.addEventListener("resize", resize);
+resize();
+
+// =======================
 // MUNDO
 // =======================
-let pits = [];
-let enemies = [];
-let goal = {};
-let stage = 1;
-
 function initWorld() {
   const groundY = canvas.height * 0.75;
 
+  player.x = 50;
   player.y = groundY - player.h;
+  player.vy = 0;
 
   pits = [
     { x: canvas.width * 0.3, w: 80 },
@@ -133,7 +110,23 @@ function initWorld() {
     h: 60
   };
 }
-initWorld();
+
+// =======================
+// BOTONES POSICIÓN
+// =======================
+function positionButtons() {
+  const margin = 20;
+  const bottom = canvas.height - 100;
+
+  buttons.left.x = margin;
+  buttons.left.y = bottom;
+
+  buttons.right.x = margin + 100;
+  buttons.right.y = bottom;
+
+  buttons.up.x = canvas.width - 100;
+  buttons.up.y = bottom;
+}
 
 // =======================
 // UPDATE
@@ -165,26 +158,19 @@ function update() {
     player.onGround = true;
   }
 
-  if (player.y > canvas.height) respawn();
+  if (player.y > canvas.height) initWorld();
 
   enemies.forEach(e => {
     e.x += e.dir * 1.2;
     if (e.x < canvas.width * 0.4 || e.x > canvas.width * 0.75) e.dir *= -1;
-    if (collide(player, e)) respawn();
+    if (collide(player, e)) initWorld();
   });
 
   if (collide(player, goal)) {
     isNight = !isNight;
     stage++;
-    respawn();
+    initWorld();
   }
-}
-
-function respawn() {
-  const groundY = canvas.height * 0.75;
-  player.x = 50;
-  player.y = groundY - player.h;
-  player.vy = 0;
 }
 
 // =======================
@@ -221,23 +207,18 @@ function drawStickman(p, hostile = false) {
 }
 
 function drawButtons() {
-  ctx.lineWidth = 2;
   ctx.strokeStyle = "rgba(0,0,0,0.5)";
-  ctx.fillStyle = "rgba(0,0,0,0.05)";
   ctx.font = "24px Arial";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  // izquierda
-  ctx.strokeRect(buttons.left.x, buttons.left.y, buttons.left.w, buttons.left.h);
+  ctx.strokeRect(buttons.left.x, buttons.left.y, 80, 80);
   ctx.fillText("◀", buttons.left.x + 40, buttons.left.y + 40);
 
-  // derecha
-  ctx.strokeRect(buttons.right.x, buttons.right.y, buttons.right.w, buttons.right.h);
+  ctx.strokeRect(buttons.right.x, buttons.right.y, 80, 80);
   ctx.fillText("▶", buttons.right.x + 40, buttons.right.y + 40);
 
-  // salto
-  ctx.strokeRect(buttons.up.x, buttons.up.y, buttons.up.w, buttons.up.h);
+  ctx.strokeRect(buttons.up.x, buttons.up.y, 80, 80);
   ctx.fillText("▲", buttons.up.x + 40, buttons.up.y + 40);
 }
 
