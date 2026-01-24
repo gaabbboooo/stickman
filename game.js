@@ -4,9 +4,6 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// =======================
-// RESIZE
-// =======================
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -27,40 +24,94 @@ const player = {
   y: 0,
   w: 20,
   h: 35,
-  vx: 0,       // velocidad horizontal
-  vy: 0,       // velocidad vertical
+  vx: 0,
+  vy: 0,
   onGround: false
 };
 
-const SPEED = 4;   // velocidad horizontal
+const SPEED = 4;
 const JUMP = -12;
 const gravity = 0.6;
+
+// =======================
+// INPUT
+// =======================
+const keys = { left: false, right: false, up: false };
+
+// Teclado
+window.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") keys.left = true;
+  if (e.key === "ArrowRight") keys.right = true;
+  if (e.key === "ArrowUp") keys.up = true;
+});
+window.addEventListener("keyup", e => {
+  if (e.key === "ArrowLeft") keys.left = false;
+  if (e.key === "ArrowRight") keys.right = false;
+  if (e.key === "ArrowUp") keys.up = false;
+});
+
+// =======================
+// BOTONES TÁCTILES
+// =======================
+const buttons = {
+  left: { x: 0, y: 0, w: 80, h: 80 },
+  right: { x: 0, y: 0, w: 80, h: 80 },
+  up: { x: 0, y: 0, w: 80, h: 80 }
+};
+
+function positionButtons() {
+  const margin = 20;
+  const bottom = canvas.height - 100;
+
+  // izquierda inferior
+  buttons.left.x = margin;
+  buttons.left.y = bottom;
+
+  buttons.right.x = margin + 100;
+  buttons.right.y = bottom;
+
+  // derecha inferior (saltar)
+  buttons.up.x = canvas.width - 100;
+  buttons.up.y = bottom;
+}
+positionButtons();
+window.addEventListener("resize", positionButtons);
+
+canvas.addEventListener("touchstart", e => {
+  e.preventDefault();
+  for (let t of e.touches) {
+    handleTouch(t.clientX, t.clientY, true);
+  }
+});
+
+canvas.addEventListener("touchend", () => {
+  keys.left = false;
+  keys.right = false;
+  keys.up = false;
+});
+
+function handleTouch(x, y, down) {
+  for (let k in buttons) {
+    const b = buttons[k];
+    if (
+      x > b.x &&
+      x < b.x + b.w &&
+      y > b.y &&
+      y < b.y + b.h
+    ) {
+      keys[k] = down;
+    }
+  }
+}
 
 // =======================
 // MUNDO
 // =======================
 let pits = [];
 let enemies = [];
-let balls = []; // Bolas de paja
 let goal = {};
-let stage = 1; // Etapa inicial
+let stage = 1;
 
-// =======================
-// CONTROLES FLUIDOS
-// =======================
-const keys = {};
-
-window.addEventListener("keydown", e => {
-  keys[e.key] = true;
-});
-
-window.addEventListener("keyup", e => {
-  keys[e.key] = false;
-});
-
-// =======================
-// INICIALIZAR MUNDO
-// =======================
 function initWorld() {
   const groundY = canvas.height * 0.75;
 
@@ -72,8 +123,7 @@ function initWorld() {
   ];
 
   enemies = [
-    { x: canvas.width * 0.4, y: groundY - 35, w: 20, h: 35, dir: 1 },
-    { x: canvas.width * 0.65, y: groundY - 35, w: 20, h: 35, dir: -1 }
+    { x: canvas.width * 0.45, y: groundY - 35, w: 20, h: 35, dir: 1 }
   ];
 
   goal = {
@@ -82,96 +132,47 @@ function initWorld() {
     w: 60,
     h: 60
   };
-
-  balls = [];
 }
-
 initWorld();
-window.addEventListener("resize", initWorld);
-
-// =======================
-// CREAR BOLA DE PAJA
-// =======================
-function spawnBall() {
-  const groundY = canvas.height * 0.75;
-  const fromLeft = Math.random() > 0.5;
-
-  const speedBase = 2 + stage * 0.5;
-  const size = 20 + Math.random() * 20;
-
-  balls.push({
-    x: fromLeft ? -size : canvas.width + size,
-    y: groundY - Math.random() * 150 - 20,
-    w: size,
-    h: size,
-    speed: fromLeft ? speedBase : -speedBase
-  });
-}
 
 // =======================
 // UPDATE
 // =======================
-let ballTimer = 0;
-const BALL_INTERVAL_BASE = 10000; // 10s base
-
-function update(delta) {
+function update() {
   const groundY = canvas.height * 0.75;
 
-  // --- MOVIMIENTO HORIZONTAL FLUIDO ---
   player.vx = 0;
-  if (keys["ArrowRight"]) player.vx = SPEED;
-  if (keys["ArrowLeft"]) player.vx = -SPEED;
+  if (keys.left) player.vx = -SPEED;
+  if (keys.right) player.vx = SPEED;
+
   player.x += player.vx;
 
-  // --- SALTO ---
-  if (keys["ArrowUp"] && player.onGround) {
+  if (keys.up && player.onGround) {
     player.vy = JUMP;
     player.onGround = false;
   }
 
-  // --- GRAVEDAD ---
   player.vy += gravity;
   player.y += player.vy;
 
-  // --- POZOS ---
   const overPit = pits.some(p =>
-    player.x + player.w > p.x &&
-    player.x < p.x + p.w
+    player.x + player.w > p.x && player.x < p.x + p.w
   );
 
   if (!overPit && player.y + player.h >= groundY) {
     player.y = groundY - player.h;
     player.vy = 0;
     player.onGround = true;
-  } else {
-    player.onGround = false;
   }
 
   if (player.y > canvas.height) respawn();
 
-  // --- ENEMIGOS ---
   enemies.forEach(e => {
     e.x += e.dir * 1.2;
-    if (e.x < canvas.width * 0.35 || e.x > canvas.width * 0.75) e.dir *= -1;
+    if (e.x < canvas.width * 0.4 || e.x > canvas.width * 0.75) e.dir *= -1;
     if (collide(player, e)) respawn();
   });
 
-  // --- BOLAS DE PAJA ---
-  ballTimer += delta;
-  const interval = BALL_INTERVAL_BASE / stage;
-  if (ballTimer >= interval) {
-    const maxBalls = stage;
-    if (balls.length < maxBalls) spawnBall();
-    ballTimer = 0;
-  }
-
-  balls.forEach((b, i) => {
-    b.x += b.speed;
-    if (collide(player, b)) respawn();
-    if (b.x < -100 || b.x > canvas.width + 100) balls.splice(i, 1);
-  });
-
-  // --- TRABAJO ---
   if (collide(player, goal)) {
     isNight = !isNight;
     stage++;
@@ -179,31 +180,15 @@ function update(delta) {
   }
 }
 
-// =======================
-// RESPAWN
-// =======================
 function respawn() {
   const groundY = canvas.height * 0.75;
   player.x = 50;
   player.y = groundY - player.h;
   player.vy = 0;
-  player.onGround = false;
 }
 
 // =======================
-// COLISIÓN
-// =======================
-function collide(a, b) {
-  return (
-    a.x < b.x + b.w &&
-    a.x + a.w > b.x &&
-    a.y < b.y + b.h &&
-    a.y + a.h > b.y
-  );
-}
-
-// =======================
-// STICKMAN
+// DRAW
 // =======================
 function drawStickman(p, hostile = false) {
   const cx = p.x + p.w / 2;
@@ -235,70 +220,61 @@ function drawStickman(p, hostile = false) {
   ctx.stroke();
 }
 
-// =======================
-// DRAW
-// =======================
+function drawButtons() {
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "rgba(0,0,0,0.5)";
+  ctx.fillStyle = "rgba(0,0,0,0.05)";
+  ctx.font = "24px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  // izquierda
+  ctx.strokeRect(buttons.left.x, buttons.left.y, buttons.left.w, buttons.left.h);
+  ctx.fillText("◀", buttons.left.x + 40, buttons.left.y + 40);
+
+  // derecha
+  ctx.strokeRect(buttons.right.x, buttons.right.y, buttons.right.w, buttons.right.h);
+  ctx.fillText("▶", buttons.right.x + 40, buttons.right.y + 40);
+
+  // salto
+  ctx.strokeRect(buttons.up.x, buttons.up.y, buttons.up.w, buttons.up.h);
+  ctx.fillText("▲", buttons.up.x + 40, buttons.up.y + 40);
+}
+
 function draw() {
   ctx.fillStyle = isNight ? "black" : "white";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = isNight ? "white" : "black";
-  ctx.lineWidth = 2;
-
   const groundY = canvas.height * 0.75;
-
-  // Sol / luna
+  ctx.strokeStyle = isNight ? "white" : "black";
   ctx.beginPath();
-  ctx.arc(100, 80, 20, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Piso con huecos
-  let startX = 0;
-  pits.forEach(p => {
-    ctx.beginPath();
-    ctx.moveTo(startX, groundY);
-    ctx.lineTo(p.x, groundY);
-    ctx.stroke();
-    startX = p.x + p.w;
-  });
-  ctx.beginPath();
-  ctx.moveTo(startX, groundY);
+  ctx.moveTo(0, groundY);
   ctx.lineTo(canvas.width, groundY);
   ctx.stroke();
 
-  // Pozos DELGADOS
-  pits.forEach(p => {
-    ctx.strokeRect(p.x, groundY, p.w, 2); // 2px de alto
-  });
-
-  // Bolas de paja
-  balls.forEach(b => {
-    ctx.beginPath();
-    ctx.rect(b.x, b.y, b.w, b.h);
-    ctx.stroke();
-  });
-
-  // Trabajo
+  pits.forEach(p => ctx.strokeRect(p.x, groundY, p.w, 2));
   ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
-  // Enemigos
   enemies.forEach(e => drawStickman(e, true));
-
-  // Jugador
   drawStickman(player);
+  drawButtons();
 }
 
 // =======================
 // LOOP
 // =======================
-let lastTime = 0;
-function loop(time) {
-  const delta = time - lastTime;
-  lastTime = time;
+function collide(a, b) {
+  return (
+    a.x < b.x + b.w &&
+    a.x + a.w > b.x &&
+    a.y < b.y + b.h &&
+    a.y + a.h > b.y
+  );
+}
 
-  update(delta);
+function loop() {
+  update();
   draw();
   requestAnimationFrame(loop);
 }
-
-loop(0);
+loop();
