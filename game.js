@@ -6,7 +6,7 @@ let phase = 1;
 let isNight = false;
 let gravity = 0.8;
 
-// Ajusta el canvas al tamaño de la ventana
+// Ajustar canvas al tamaño de la ventana
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -17,7 +17,7 @@ window.addEventListener("resize", resize);
 // Altura del suelo
 const groundY = () => canvas.height - 120;
 
-// Controles keyboard
+// Controles teclado
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
@@ -69,13 +69,17 @@ class Stickman {
     ctx.lineWidth = 2;
 
     ctx.beginPath();
+    // Cabeza
     ctx.arc(this.x, this.y - 30, 8, 0, Math.PI * 2);
+    // Cuerpo
     ctx.moveTo(this.x, this.y - 22);
     ctx.lineTo(this.x, this.y);
+    // Brazos
     ctx.moveTo(this.x, this.y - 10);
     ctx.lineTo(this.x - 8, this.y - 20);
     ctx.moveTo(this.x, this.y - 10);
     ctx.lineTo(this.x + 8, this.y - 20);
+    // Piernas
     ctx.moveTo(this.x, this.y);
     ctx.lineTo(this.x - 6, this.y + 10);
     ctx.moveTo(this.x, this.y);
@@ -168,7 +172,6 @@ function setupPhase() {
   // Bolas de paja
   if (phase >= 4) weeds.push(new Tumbleweed());
 }
-setupPhase();
 
 // Cambiar de fase
 function nextPhase() {
@@ -177,6 +180,8 @@ function nextPhase() {
   player.reset();
   setupPhase();
 }
+
+setupPhase();
 
 // Dibujar mundo
 function drawWorld() {
@@ -204,16 +209,12 @@ function loop() {
   player.update();
   player.draw();
 
+  // Colisiones
   pits.forEach(p => { if (p.kills(player)) player.reset(); });
-  enemies.forEach(e => {
-    e.update();
-    if (e.hits(player)) player.reset();
-  });
-  weeds.forEach(w => {
-    e.update();
-    if (w.hits(player)) player.reset();
-  });
+  enemies.forEach(e => { e.update(); if (e.hits(player)) player.reset(); });
+  weeds.forEach(w => { w.update(); if (w.hits(player)) player.reset(); });
 
+  // Avanzar de fase
   if (player.x > buildingX()) nextPhase();
 
   requestAnimationFrame(loop);
