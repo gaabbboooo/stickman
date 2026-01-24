@@ -1,36 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-
-  <!-- MUY IMPORTANTE PARA MÓVIL -->
-  <meta name="viewport" content="
-    width=device-width,
-    height=device-height,
-    initial-scale=1.0,
-    maximum-scale=1.0,
-    user-scalable=no
-  ">
-
+  <meta charset="UTF-8" />
   <title>Stickman</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
+      background: #87ceeb;
       touch-action: none;
-      background: white;
     }
-
     canvas {
       display: block;
     }
+
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .left {
+      position: absolute;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .right {
+      position: absolute;
+      right: 20px;
+      pointer-events: auto;
+    }
+
+    button {
+      width: 60px;
+      height: 60px;
+      font-size: 28px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.6);
+      color: white;
+    }
   </style>
 </head>
-
 <body>
-  <canvas id="game"></canvas>
-  <script src="game.js"></script>
+
+<canvas id="game"></canvas>
+
+<div class="controls">
+  <div class="left">
+    <button id="leftBtn">◀</button>
+    <button id="rightBtn">▶</button>
+  </div>
+  <div class="right">
+    <button id="jumpBtn">⬆</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
 </body>
 </html>
