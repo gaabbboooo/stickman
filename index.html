@@ -2,12 +2,24 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+
+  <!-- MUY IMPORTANTE PARA MÓVIL -->
+  <meta name="viewport" content="
+    width=device-width,
+    height=device-height,
+    initial-scale=1.0,
+    maximum-scale=1.0,
+    user-scalable=no
+  ">
+
   <title>Stickman</title>
+
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
+      touch-action: none;
       background: white;
     }
 
@@ -16,9 +28,9 @@
     }
   </style>
 </head>
+
 <body>
   <canvas id="game"></canvas>
-
   <script src="game.js"></script>
 </body>
 </html>
