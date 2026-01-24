@@ -1,67 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Stickman</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stickman Adventure</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #87ceeb;
-      touch-action: none;
     }
     canvas {
       display: block;
     }
-
-    .controls {
+    /* Botones táctiles */
+    .control-btn {
       position: fixed;
-      bottom: 20px;
-      width: 100%;
-      pointer-events: none;
-    }
-
-    .left {
-      position: absolute;
-      left: 20px;
-      display: flex;
-      gap: 10px;
-      pointer-events: auto;
-    }
-
-    .right {
-      position: absolute;
-      right: 20px;
-      pointer-events: auto;
-    }
-
-    button {
       width: 60px;
       height: 60px;
-      font-size: 28px;
+      background-color: rgba(0,0,0,0.3);
       border-radius: 50%;
-      border: none;
-      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
       color: white;
+      font-weight: bold;
+      font-size: 20px;
+      z-index: 10;
+      user-select: none;
     }
+    #leftBtn { bottom: 20px; left: 20px; }
+    #rightBtn { bottom: 20px; left: 100px; }
+    #jumpBtn { bottom: 20px; right: 20px; }
   </style>
 </head>
 <body>
+  <canvas id="game"></canvas>
 
-<canvas id="game"></canvas>
+  <!-- Botones táctiles -->
+  <div id="leftBtn" class="control-btn">&#8592;</div>
+  <div id="rightBtn" class="control-btn">&#8594;</div>
+  <div id="jumpBtn" class="control-btn">&#8593;</div>
 
-<div class="controls">
-  <div class="left">
-    <button id="leftBtn">◀</button>
-    <button id="rightBtn">▶</button>
-  </div>
-  <div class="right">
-    <button id="jumpBtn">⬆</button>
-  </div>
-</div>
-
-<script src="game.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
