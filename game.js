@@ -1,12 +1,10 @@
+/* ==========================
+   CONFIGURACIÓN GENERAL
+========================== */
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let keys = {};
-let phase = 1;
-let isNight = false;
-let gravity = 0.8;
-
-// Ajustar canvas al tamaño de la ventana
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -14,26 +12,48 @@ function resize() {
 resize();
 window.addEventListener("resize", resize);
 
-// Altura del suelo
 const groundY = () => canvas.height - 120;
 
-// Controles teclado
+let keys = {};
+let phase = 1;
+let isNight = false;
+let lastPhaseChange = 0;
+
+const gravity = 0.8;
+
+/* ==========================
+   CONTROLES
+========================== */
+
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
-// Controles táctiles
 function bind(id, key) {
   const b = document.getElementById(id);
-  b.addEventListener("touchstart", e => { e.preventDefault(); keys[key] = true; });
-  b.addEventListener("touchend", e => { e.preventDefault(); keys[key] = false; });
+  b.addEventListener("touchstart", e => {
+    e.preventDefault();
+    keys[key] = true;
+  });
+  b.addEventListener("touchend", e => {
+    e.preventDefault();
+    keys[key] = false;
+  });
 }
-bind("leftBtn", "ArrowLeft");
-bind("rightBtn", "ArrowRight");
-bind("jumpBtn", "ArrowUp");
 
-// Stickman
-class Stickman {
-  constructor() { this.reset(); }
+bind("left", "ArrowLeft");
+bind("right", "ArrowRight");
+bind("jump", "ArrowUp");
+
+/* ==========================
+   STICKMAN
+========================== */
+
+class Player {
+  constructor() {
+    this.reset();
+    this.maxXReached = 0;
+    this.crossedFirstPit = false;
+  }
 
   reset() {
     this.x = 60;
@@ -62,6 +82,8 @@ class Stickman {
       this.vy = 0;
       this.onGround = true;
     }
+
+    this.maxXReached = Math.max(this.maxXReached, this.x);
   }
 
   draw() {
@@ -69,17 +91,13 @@ class Stickman {
     ctx.lineWidth = 2;
 
     ctx.beginPath();
-    // Cabeza
     ctx.arc(this.x, this.y - 30, 8, 0, Math.PI * 2);
-    // Cuerpo
     ctx.moveTo(this.x, this.y - 22);
     ctx.lineTo(this.x, this.y);
-    // Brazos
     ctx.moveTo(this.x, this.y - 10);
     ctx.lineTo(this.x - 8, this.y - 20);
     ctx.moveTo(this.x, this.y - 10);
     ctx.lineTo(this.x + 8, this.y - 20);
-    // Piernas
     ctx.moveTo(this.x, this.y);
     ctx.lineTo(this.x - 6, this.y + 10);
     ctx.moveTo(this.x, this.y);
@@ -88,7 +106,10 @@ class Stickman {
   }
 }
 
-// Pozo
+/* ==========================
+   OBSTÁCULOS
+========================== */
+
 class Pit {
   constructor(x, w) {
     this.x = x;
@@ -100,20 +121,23 @@ class Pit {
   }
 
   kills(p) {
-    return p.onGround && p.x > this.x && p.x < this.x + this.w;
+    if (p.onGround && p.x > this.x && p.x < this.x + this.w) {
+      p.crossedFirstPit = true;
+      return true;
+    }
+    return false;
   }
 }
 
-// Enemigos
 class Enemy {
-  constructor(x) {
-    this.x = x;
-    this.dir = Math.random() < 0.5 ? -1 : 1;
+  constructor(dir) {
+    this.dir = dir;
+    this.x = dir === -1 ? canvas.width + 60 : -60;
+    this.speed = 2 + phase * 0.3;
   }
 
   update() {
-    this.x += this.dir * 2;
-    if (this.x < 0 || this.x > canvas.width) this.dir *= -1;
+    this.x += this.speed * this.dir;
   }
 
   draw() {
@@ -123,68 +147,69 @@ class Enemy {
   hits(p) {
     return p.onGround && Math.abs(p.x - this.x) < 15;
   }
+
+  out() {
+    return this.x < -100 || this.x > canvas.width + 100;
+  }
 }
 
-// Bola de paja
 class Tumbleweed {
-  constructor() {
-    this.x = -40;
-    this.speed = 4;
+  constructor(dir) {
+    this.dir = dir;
+    this.x = dir === -1 ? canvas.width + 80 : -80;
+    this.speed = 3 + phase * 0.4;
   }
 
   update() {
-    this.x += this.speed;
-    if (this.x > canvas.width + 40) this.x = -40;
+    this.x += this.speed * this.dir;
   }
 
   draw() {
     ctx.beginPath();
-    ctx.arc(this.x, groundY() - 10, 20, 0, Math.PI * 2);
+    ctx.arc(this.x, groundY() - 10, 18, 0, Math.PI * 2);
     ctx.stroke();
   }
 
   hits(p) {
-    return p.onGround && Math.abs(p.x - this.x) < 20;
+    return p.onGround && Math.abs(p.x - this.x) < 18;
+  }
+
+  out() {
+    return this.x < -120 || this.x > canvas.width + 120;
   }
 }
 
-// Variables del juego
-let player = new Stickman();
+/* ==========================
+   JUEGO
+========================== */
+
+const player = new Player();
 let pits = [];
 let enemies = [];
 let weeds = [];
-const buildingX = () => canvas.width - 140;
+let lastEnemySpawn = 0;
+let lastWeedSpawn = 0;
 
-// Configuración de fases
+const buildingX = () => canvas.width - 120;
+
 function setupPhase() {
   pits = [];
   enemies = [];
   weeds = [];
+  player.reset();
 
-  // Pozos
   pits.push(new Pit(300, 30));
   if (phase >= 2) pits.push(new Pit(600, 30));
-
-  // Enemigos
-  if (phase >= 3) enemies.push(new Enemy(400));
-  if (phase >= 5) enemies.push(new Enemy(700));
-
-  // Bolas de paja
-  if (phase >= 4) weeds.push(new Tumbleweed());
-}
-
-// Cambiar de fase
-function nextPhase() {
-  phase++;
-  isNight = !isNight;
-  player.reset();
-  setupPhase();
 }
 
 setupPhase();
 
-// Dibujar mundo
-function drawWorld() {
+/* ==========================
+   LOOP PRINCIPAL
+========================== */
+
+function loop(timestamp) {
+  // Fondo
   ctx.fillStyle = isNight ? "#000" : "#87ceeb";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -194,30 +219,56 @@ function drawWorld() {
   ctx.lineTo(canvas.width, groundY());
   ctx.stroke();
 
-  pits.forEach(p => p.draw());
-  enemies.forEach(e => e.draw());
-  weeds.forEach(w => w.draw());
-
-  // Edificio al final
+  // Edificio
   ctx.strokeRect(buildingX(), groundY() - 90, 70, 90);
-}
 
-// Loop principal
-function loop() {
-  drawWorld();
-
+  // Player
   player.update();
   player.draw();
 
-  // Colisiones
-  pits.forEach(p => { if (p.kills(player)) player.reset(); });
-  enemies.forEach(e => { e.update(); if (e.hits(player)) player.reset(); });
-  weeds.forEach(w => { w.update(); if (w.hits(player)) player.reset(); });
+  // Pozos
+  pits.forEach(p => {
+    p.draw();
+    if (p.kills(player)) player.reset();
+  });
 
-  // Avanzar de fase
-  if (player.x > buildingX()) nextPhase();
+  // Spawn enemigos
+  if (phase >= 3 && timestamp - lastEnemySpawn > 2000) {
+    const dir = player.crossedFirstPit ? (Math.random() < 0.5 ? -1 : 1) : -1;
+    enemies.push(new Enemy(dir));
+    lastEnemySpawn = timestamp;
+  }
+
+  // Spawn bola de paja
+  if (phase >= 4 && timestamp - lastWeedSpawn > 10000) {
+    const dir = player.crossedFirstPit ? (Math.random() < 0.5 ? -1 : 1) : -1;
+    weeds.push(new Tumbleweed(dir));
+    lastWeedSpawn = timestamp;
+  }
+
+  enemies = enemies.filter(e => {
+    e.update();
+    e.draw();
+    if (e.hits(player)) player.reset();
+    return !e.out();
+  });
+
+  weeds = weeds.filter(w => {
+    w.update();
+    w.draw();
+    if (w.hits(player)) player.reset();
+    return !w.out();
+  });
+
+  // Cambio de fase
+  if (player.x > buildingX() && timestamp - lastPhaseChange > 500) {
+    phase++;
+    isNight = !isNight;
+    lastPhaseChange = timestamp;
+    setupPhase();
+  }
 
   requestAnimationFrame(loop);
 }
 
-loop();
+requestAnimationFrame(loop);

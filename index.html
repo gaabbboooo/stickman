@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stickman Adventure</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>Stickman – Test Build</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
+      background: #87ceeb;
     }
     canvas {
       display: block;
     }
-    /* Botones táctiles */
-    .control-btn {
+    .btn {
       position: fixed;
-      width: 60px;
-      height: 60px;
-      background-color: rgba(0,0,0,0.3);
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
+      background: rgba(0,0,0,0.35);
+      color: white;
+      font-size: 28px;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
-      font-weight: bold;
-      font-size: 20px;
-      z-index: 10;
       user-select: none;
+      z-index: 10;
     }
-    #leftBtn { bottom: 20px; left: 20px; }
-    #rightBtn { bottom: 20px; left: 100px; }
-    #jumpBtn { bottom: 20px; right: 20px; }
+    #left { bottom: 20px; left: 20px; }
+    #right { bottom: 20px; left: 120px; }
+    #jump { bottom: 20px; right: 20px; }
   </style>
 </head>
 <body>
   <canvas id="game"></canvas>
 
-  <!-- Botones táctiles -->
-  <div id="leftBtn" class="control-btn">&#8592;</div>
-  <div id="rightBtn" class="control-btn">&#8594;</div>
-  <div id="jumpBtn" class="control-btn">&#8593;</div>
+  <div id="left" class="btn">◀</div>
+  <div id="right" class="btn">▶</div>
+  <div id="jump" class="btn">▲</div>
 
   <script src="game.js"></script>
 </body>
