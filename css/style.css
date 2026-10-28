@@ -1,0 +1,94 @@
+@font-face {
+  font-family: 'Patrick Hand';
+  src: url('../assets/fonts/PatrickHand.woff2') format('woff2'),
+       url('../assets/fonts/PatrickHand.woff') format('woff');
+  font-display: swap;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #2b2721;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+canvas {
+  display: block;
+  position: fixed;
+  inset: 0;
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f4ecd9;
+  font: 28px 'Patrick Hand', cursive;
+}
+
+/* Controles táctiles */
+
+.pad {
+  position: fixed;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  gap: 14px;
+  z-index: 10;
+}
+.left-pad { left: max(18px, env(safe-area-inset-left)); }
+.right-pad { right: max(18px, env(safe-area-inset-right)); align-items: flex-end; }
+
+.btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(29, 33, 64, 0.75);
+  background: rgba(255, 253, 246, 0.55);
+  color: #1d2140;
+  font: 28px 'Patrick Hand', cursive;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  touch-action: none;
+}
+.btn.big { width: 84px; height: 84px; font-size: 32px; }
+.btn.on { background: rgba(35, 70, 200, 0.45); color: #fffdf6; }
+
+.pause {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+  z-index: 10;
+}
+
+/* ocultos salvo en pantallas táctiles durante la partida */
+.pad, .btn.pause { display: none; }
+body.touch.playing .pad,
+body.touch.playing .btn.pause { display: flex; }
+
+/* En móvil vertical la página se ve diminuta: pedimos girar el dispositivo */
+#rotate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+  background: #f4ecd9;
+  color: #1d2140;
+  font: 30px 'Patrick Hand', cursive;
+}
+@media (orientation: portrait) {
+  body.touch #rotate { display: flex; }
+}

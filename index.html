@@ -2,44 +2,41 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>Stickman – Test Build</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #87ceeb;
-    }
-    canvas {
-      display: block;
-    }
-    .btn {
-      position: fixed;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.35);
-      color: white;
-      font-size: 28px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      user-select: none;
-      z-index: 10;
-    }
-    #left { bottom: 20px; left: 20px; }
-    #right { bottom: 20px; left: 120px; }
-    #jump { bottom: 20px; right: 20px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <title>INKLING · Demo</title>
+  <meta name="description" content="INKLING: un plataformas 2D dibujado en un cuaderno. Demo jugable del Capítulo 1." />
+  <meta name="theme-color" content="#2b2721" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23f4ecd9'/%3E%3Cpath d='M32 10c6 10 14 18 14 28a14 14 0 0 1-28 0c0-10 8-18 14-28z' fill='%232346c8' stroke='%231d2140' stroke-width='3'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <canvas id="game"></canvas>
+  <canvas id="game" aria-label="INKLING, juego de plataformas"></canvas>
+  <div id="loading">Afilando lápices…</div>
 
-  <div id="left" class="btn">◀</div>
-  <div id="right" class="btn">▶</div>
-  <div id="jump" class="btn">▲</div>
+  <!-- Controles táctiles (solo visibles en pantallas táctiles durante la partida) -->
+  <div class="pad left-pad">
+    <button class="btn" data-action="left" aria-label="Izquierda">◀</button>
+    <button class="btn" data-action="right" aria-label="Derecha">▶</button>
+  </div>
+  <div class="pad right-pad">
+    <button class="btn" data-action="shoot" aria-label="Lanzar tinta">✒</button>
+    <button class="btn big" data-action="jump" aria-label="Saltar">▲</button>
+  </div>
+  <button class="btn pause" data-action="pause" aria-label="Pausa">❚❚</button>
 
-  <script src="game.js"></script>
+  <div id="rotate">Gira el dispositivo para jugar en horizontal ↻</div>
+
+  <noscript>INKLING necesita JavaScript para funcionar.</noscript>
+
+  <script src="src/core.js"></script>
+  <script src="src/audio.js"></script>
+  <script src="src/input.js"></script>
+  <script src="src/level.js"></script>
+  <script src="src/entities.js"></script>
+  <script src="src/boss.js"></script>
+  <script src="src/world.js"></script>
+  <script src="src/render.js"></script>
+  <script src="src/ui.js"></script>
+  <script src="src/main.js"></script>
 </body>
 </html>
