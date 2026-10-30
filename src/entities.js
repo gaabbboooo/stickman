@@ -83,6 +83,7 @@
           world.spawnShot(this.cx + this.facing * 14, this.y + 17, this.facing, this.vx);
           INK.audio.play('shoot');
           world.stats.shots++;
+          if (world.stats.shots === 1) INK.tel.log('shot1', this.cx);
         } else if (inp.was('shoot')) {
           INK.audio.play('empty');
           world.puff(this.cx + this.facing * 14, this.y + 17);
@@ -100,9 +101,10 @@
       this.run += Math.abs(this.vx) * dt * 0.055;
     }
 
-    hurt(fromX, world, knock = 1) {
+    hurt(fromX, world, knock = 1, cause = '?') {
       if (this.invul > 0 || this.dead) return false;
       this.hearts -= 1;
+      INK.tel.log('hurt', this.cx, cause);
       world.stats.hits++;
       this.invul = 1.4; this.hurtT = 0.28;
       this.vx = sign(this.cx - fromX || -this.facing) * 260 * knock;
@@ -200,7 +202,7 @@
         p.vy = -470; p.jumpCut = true; p.y = this.y - p.h - 1;
         this.onStomp(world);
       } else if (this.harmful()) {
-        p.hurt(this.cx, world);
+        p.hurt(this.cx, world, 1, this.type);
       }
     }
     harmful() { return true; }

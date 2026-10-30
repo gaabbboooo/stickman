@@ -116,6 +116,7 @@
       const p = this.player;
       p.dead = true;
       this.finished = true;
+      INK.tel.log('die', p.cx, this.boss ? this.boss.hp : undefined);
       INK.audio.play('lose');
       this.onEvent('gameover');
     }
@@ -123,6 +124,7 @@
     respawnAfterFall() {
       const p = this.player;
       this.stats.falls++;
+      INK.tel.log('fall', this.player.cx);
       p.hearts -= 1;
       this.shake(6);
       if (p.hearts <= 0) { p.hearts = 0; this.playerDied(); return; }
@@ -142,6 +144,7 @@
       const p = this.player;
       if (this.arenaActive) this.resetArena();
       const cp = this.checkpoints[this.cpIndex];
+      INK.tel.log('continue', cp.x, this.cpIndex);
       p.spawn(cp.x, this.groundY);
       p.hearts = p.maxHearts; p.ink = p.maxInk; p.invul = 1.5;
       this.finished = false; this.ended = null;
@@ -159,6 +162,7 @@
         { x: a.x2, y: -400, w: 30, h: 1000, kind: 'block' },
       ];
       this.boss = new INK.Corrector(a.bossX, this);
+      INK.tel.log('boss', this.player.cx);
       INK.audio.music('boss');
       this.showBanner('¡El Corrector quiere tapar la página!', 2.4);
     }
@@ -171,6 +175,7 @@
 
     bossDefeated() {
       this.bossDone = true; this.boss = null;
+      INK.tel.log('bossdown', this.player.cx);
       this.blobs = []; this.waves = []; this.puddles = [];
       this.arenaWalls = [this.arenaWalls[1]]; // se abre la izquierda; la derecha es el final del nivel
       this.exitOpen = true;
@@ -201,7 +206,7 @@
       this.enemies = this.enemies.filter((e) => e.alive);
 
       for (const s of this.spikes) {
-        if (overlap({ x: s.x + 4, y: s.y + 4, w: s.w - 8, h: s.h - 4 }, p) && p.hurt(s.x + s.w / 2, this, 0.6)) p.vy = -520;
+        if (overlap({ x: s.x + 4, y: s.y + 4, w: s.w - 8, h: s.h - 4 }, p) && p.hurt(s.x + s.w / 2, this, 0.6, 'chinchetas')) p.vy = -520;
       }
 
       // proyectiles contra enemigos, gotas de corrector y jefe
@@ -228,6 +233,7 @@
         c.wave += dt;
         if (!c.active && p.x > c.x - 10 && i > this.cpIndex) {
           c.active = true; c.wave = 0; this.cpIndex = i;
+          INK.tel.log('cp', c.x, i);
           INK.audio.play('checkpoint');
           const healed = p.hearts < p.maxHearts;
           p.hearts = p.maxHearts;
@@ -253,6 +259,7 @@
         if (!this.finished && overlap(p, { x: ex.x, y: ex.y, w: 70, h: 90 })) {
           this.finished = true;
           INK.audio.play('win');
+          INK.tel.log('win', p.cx, Math.round(this.stats.time));
           this.onEvent('victory');
         }
       }

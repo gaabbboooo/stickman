@@ -34,6 +34,7 @@
   }
 
   function newGame() {
+    INK.tel.log('start');
     ui.world = new INK.World((ev) => { ui.world.ended = { type: ev, t: 0 }; });
     setScene('play');
     INK.audio.music('calm');

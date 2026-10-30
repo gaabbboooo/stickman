@@ -85,7 +85,7 @@
       this.x = clamp(this.x, this.arena.x1, this.arena.x2 - this.w);
 
       // contacto con el jugador
-      if (this.state !== 'dying' && INK.overlap(this, p)) p.hurt(this.cx, world, 1.4);
+      if (this.state !== 'dying' && INK.overlap(this, p)) p.hurt(this.cx, world, 1.4, 'corrector');
     }
 
     next() {
@@ -212,7 +212,7 @@
       if (this.y > 700) this.alive = false;
       if (this.alive && INK.overlap(this.box, world.player)) {
         this.alive = false;
-        world.player.hurt(this.x, world);
+        world.player.hurt(this.x, world, 1, 'gota');
         world.splash(this.x, this.y, C.white, 6);
       }
     }
@@ -230,7 +230,7 @@
     update(dt, world) {
       this.life -= dt;
       if (this.life <= 0) this.alive = false;
-      else if (this.life < 2.8 && INK.overlap(this.box, world.player)) world.player.hurt(this.x + this.w / 2, world, 0.8);
+      else if (this.life < 2.8 && INK.overlap(this.box, world.player)) world.player.hurt(this.x + this.w / 2, world, 0.8, 'charco');
     }
     draw(ctx) {
       ctx.globalAlpha = Math.min(1, this.life * 2);
@@ -249,7 +249,7 @@
       this.x += this.dir * 330 * dt;
       const a = world.level.arena;
       if (this.x < a.x1 || this.x > a.x2) this.alive = false;
-      if (this.alive && INK.overlap(this.box, world.player)) world.player.hurt(this.x - this.dir * 20, world);
+      if (this.alive && INK.overlap(this.box, world.player)) world.player.hurt(this.x - this.dir * 20, world, 1, 'onda');
     }
     draw(ctx) {
       ctx.fillStyle = C.white; ctx.strokeStyle = C.ink; ctx.lineWidth = 2;

@@ -92,3 +92,25 @@ body.touch.playing .btn.pause { display: flex; }
 @media (orientation: portrait) {
   body.touch #rotate { display: flex; }
 }
+
+/* Modo playtest (?playtest): distintivo y código de sesión */
+#playtest .pt-badge {
+  position: fixed; left: 50%; bottom: 8px; transform: translateX(-50%);
+  z-index: 30; padding: 2px 10px; border-radius: 6px;
+  background: #c43a2f; color: #fffdf6; font: 15px 'Patrick Hand', cursive; letter-spacing: 1px;
+}
+#playtest .pt-box {
+  display: none; position: fixed; right: max(16px, env(safe-area-inset-right)); top: max(16px, env(safe-area-inset-top)); z-index: 30; width: 240px;
+  padding: 10px 12px; border: 2px solid #1d2140; border-radius: 8px; background: #fffdf6;
+  color: #1d2140; font: 17px 'Patrick Hand', cursive;
+}
+#playtest.show .pt-box { display: block; }
+#playtest .pt-box p { margin: 0 0 6px; }
+#playtest textarea {
+  width: 100%; box-sizing: border-box; height: 52px; resize: none; font: 11px monospace;
+  border: 1px solid #b4cbe0; background: #f4ecd9; color: #1d2140;
+}
+#playtest button {
+  margin-top: 6px; width: 100%; padding: 6px; border: 2px solid #1d2140; border-radius: 6px;
+  background: #2346c8; color: #fffdf6; font: 18px 'Patrick Hand', cursive; cursor: pointer;
+}

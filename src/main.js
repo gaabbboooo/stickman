@@ -59,6 +59,7 @@
     ctx.beginPath(); ctx.rect(0, 0, INK.W, INK.H); ctx.clip();
     INK.ui.draw(ctx);
     ctx.restore();
+    INK.tel.sync(INK.ui.scene);
   }
 
   INK.view = view;

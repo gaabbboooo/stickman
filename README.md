@@ -7,6 +7,8 @@ El Ejército del Borrador quiere dejar el cuaderno en blanco. Eres un pequeño p
 
 Una partida completa dura unos pocos minutos.
 
+📁 **Dossier del proyecto:** [docs/](docs/README.md). Auditoría, decisiones, pruebas, plan de playtest y hoja de ruta 2.0, con sus evidencias.
+
 ## Cómo jugar
 
 | Acción | Teclado | Pantalla táctil |
@@ -64,10 +66,16 @@ src/world.js          física, cámara, marcapáginas y reglas
 src/render.js         cuaderno, nivel y HUD
 src/ui.js             menús, pausa, derrota, victoria y transiciones
 src/main.js           arranque y bucle a paso fijo (60 Hz)
+src/telemetry.js      modo ?playtest: registro de la partida y código de sesión
+docs/                 dossier del proyecto y evidencias
 assets/fonts/         tipografía Patrick Hand (licencia OFL)
 ```
 
 Todo el arte se dibuja por código sobre un lienzo de 960×540 que se escala a cualquier pantalla, y todo el sonido se sintetiza en tiempo real: el juego no carga imágenes ni audio externos.
+
+## Modo playtest
+
+Añade `?playtest` a la URL (por ejemplo `index.html?playtest`) para las sesiones de prueba con personas. El juego muestra un distintivo «PLAYTEST» y, en pausa, derrota o victoria, un **código de sesión** con lo que ha pasado en la partida: dónde ha recibido golpes, de qué, cuándo ha disparado por primera vez y si ha terminado. No envía nada a ningún servidor; el código se copia a mano en el registro de playtest. Sin el parámetro no se registra nada. Guía completa en [docs/04-plan-playtest.md](docs/04-plan-playtest.md).
 
 ## Pruebas realizadas
 
@@ -84,7 +92,7 @@ Probado en Chromium sin interfaz, tanto abriendo el archivo directamente como se
 ## Limitaciones conocidas
 
 - Es una demo de un solo capítulo; no hay guardado entre sesiones (solo se recuerdan las opciones de sonido).
-- La dificultad se ha ajustado con pruebas automáticas, no con pruebas con jugadores reales.
+- La dificultad se ha ajustado con pruebas automáticas; el test con jugadores reales está planificado y pendiente (ver dossier).
 - En móvil se juega en horizontal; en vertical se pide girar el dispositivo.
 - Sin soporte de mando.
 - Los navegadores solo permiten sonar al audio después de la primera pulsación o toque.
